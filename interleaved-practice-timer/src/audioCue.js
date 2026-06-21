@@ -14,6 +14,17 @@ export function preparePracticeBeep(audioContextRef, windowLike = window) {
       context.resume();
     }
 
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(440, context.currentTime);
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.03);
+    oscillator.start(context.currentTime);
+    oscillator.stop(context.currentTime + 0.04);
     return true;
   } catch {
     return false;

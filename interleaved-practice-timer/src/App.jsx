@@ -97,7 +97,13 @@ function App() {
   }
 
   function updateSetting(key, value) {
-    setSettings((current) => ({ ...current, [key]: value }));
+    const nextSettings = { ...settings, [key]: value };
+    setSettings(nextSettings);
+    if (!running && key !== "orderMode") {
+      const nextDuration = getIntervalSeconds(nextSettings);
+      setDuration(nextDuration);
+      setRemaining(nextDuration);
+    }
   }
 
   return (

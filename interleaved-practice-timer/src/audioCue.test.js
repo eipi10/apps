@@ -37,14 +37,21 @@ describe("preparePracticeBeep", () => {
     expect(preparePracticeBeep({ current: null }, {})).toBe(false);
   });
 
-  it("creates an audio context without scheduling sound", () => {
+  it("creates an audio context and schedules an inaudible unlock tone", () => {
     const windowLike = makeWindowWithAudioContext();
     const audioContextRef = { current: null };
 
     expect(preparePracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createOscillator).not.toHaveBeenCalled();
-    expect(windowLike.context.createGain).not.toHaveBeenCalled();
+    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
+    expect(windowLike.context.createGain).toHaveBeenCalledTimes(1);
+    expect(windowLike.oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
+      440,
+      10
+    );
+    expect(windowLike.gain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 10);
+    expect(windowLike.oscillator.start).toHaveBeenCalledWith(10);
+    expect(windowLike.oscillator.stop).toHaveBeenCalledWith(10.04);
   });
 });
 
@@ -59,8 +66,8 @@ describe("playPracticeBeep", () => {
 
     expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createGain).toHaveBeenCalledTimes(1);
+    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(2);
+    expect(windowLike.context.createGain).toHaveBeenCalledTimes(2);
     expect(windowLike.oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
       880,
       10
@@ -79,6 +86,6 @@ describe("playPracticeBeep", () => {
 
     expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).not.toHaveBeenCalled();
-    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
+    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(2);
   });
 });
