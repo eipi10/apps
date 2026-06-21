@@ -8,6 +8,7 @@ import {
   makeSessionSummary,
   parsePracticeItems
 } from "./practiceEngine.js";
+import { playPracticeBeep, preparePracticeBeep } from "./audioCue.js";
 import "./styles.css";
 
 const initialSettings = {
@@ -26,6 +27,7 @@ function App() {
   const [remaining, setRemaining] = useState(getIntervalSeconds(initialSettings));
   const [running, setRunning] = useState(false);
   const intervalRef = useRef(null);
+  const audioContextRef = useRef(null);
 
   const items = useMemo(() => parsePracticeItems(itemText), [itemText]);
   const currentItem = items[currentIndex] ?? "Add a practice item";
@@ -44,14 +46,14 @@ function App() {
     intervalRef.current = window.setInterval(() => {
       setRemaining((value) => {
         if (value > 1) return value - 1;
-        advanceItem();
-        return 0;
+        return completeTimerBlock();
       });
     }, 1000);
   }
 
   function startSession() {
     if (!canStart) return;
+    preparePracticeBeep(audioContextRef);
     const nextDuration = getIntervalSeconds(settings);
     const safeIndex = Math.min(currentIndex, Math.max(items.length - 1, 0));
     setCurrentIndex(safeIndex);
@@ -75,7 +77,7 @@ function App() {
     setRunning(false);
   }
 
-  function advanceItem() {
+  function advanceItem({ resetRemaining = true } = {}) {
     const nextDuration = getIntervalSeconds(settings);
     setCurrentIndex((index) =>
       getNextItemIndex({
@@ -85,7 +87,13 @@ function App() {
       })
     );
     setDuration(nextDuration);
-    setRemaining(nextDuration);
+    if (resetRemaining) setRemaining(nextDuration);
+    return nextDuration;
+  }
+
+  function completeTimerBlock() {
+    playPracticeBeep(audioContextRef);
+    return advanceItem({ resetRemaining: false });
   }
 
   function updateSetting(key, value) {
