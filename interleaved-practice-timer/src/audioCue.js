@@ -124,11 +124,11 @@ export function preparePracticeBeep(audioRef, windowLike = window) {
 
 export function playPracticeBeep(audioRef, windowLike = window) {
   const state = getAudioState(audioRef);
-  const webAudioPlayed = playWebAudioTone(state, windowLike, {
+  if (playMediaElement(state, windowLike)) return true;
+
+  return playWebAudioTone(state, windowLike, {
     frequency: 880,
     volume: 0.22,
     duration: 0.38
   });
-  const mediaPlayed = playMediaElement(state, windowLike);
-  return webAudioPlayed || mediaPlayed;
 }

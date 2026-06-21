@@ -50,6 +50,13 @@ function makeWindowWithAudioElement() {
   return { Audio: FakeAudio, audioInstances, load, play };
 }
 
+function makeWindowWithAudioContextAndElement() {
+  return {
+    ...makeWindowWithAudioContext(),
+    ...makeWindowWithAudioElement()
+  };
+}
+
 describe("preparePracticeBeep", () => {
   it("returns false when Web Audio is unavailable", () => {
     expect(preparePracticeBeep({ current: null }, {})).toBe(false);
@@ -123,5 +130,15 @@ describe("playPracticeBeep", () => {
     expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.audioInstances).toHaveLength(1);
     expect(windowLike.play).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses a single playback path when both media and Web Audio are available", () => {
+    const windowLike = makeWindowWithAudioContextAndElement();
+    const audioContextRef = { current: null };
+
+    expect(preparePracticeBeep(audioContextRef, windowLike)).toBe(true);
+    expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
+    expect(windowLike.play).toHaveBeenCalledTimes(1);
+    expect(windowLike.context.createOscillator).not.toHaveBeenCalled();
   });
 });
