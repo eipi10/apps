@@ -1,124 +1,16 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Interleaved Practice Timer</title>
-  <meta name="description" content="A no-backend timer and practice-session builder for interleaved music practice." />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="site-header">
-    <div>
-      <p class="eyebrow">Music practice tool</p>
-      <h1>Interleaved Practice Timer</h1>
-      <p class="lede">Build short, repeated passes through difficult spots instead of staying blocked on one thing.</p>
-    </div>
-    <button id="themeToggle" class="ghost" type="button" aria-label="Toggle dark mode">Dark mode</button>
-  </header>
-
-  <main>
-    <section class="panel intro">
-      <h2>Session builder</h2>
-      <p>Add passages, sections, techniques, or mock-performance spots. Then choose a practice mode and generate a session.</p>
-      <div class="grid two">
-        <label>Session name
-          <input id="sessionName" value="Today’s interleaved practice" />
-        </label>
-        <label>Default block length, minutes
-          <input id="defaultMinutes" type="number" min="1" max="30" value="5" />
-        </label>
-      </div>
-      <div class="add-row">
-        <input id="itemName" placeholder="e.g., Bach m. 17–24 shift" />
-        <input id="itemMinutes" type="number" min="1" max="30" value="5" aria-label="minutes" />
-        <button id="addItem" type="button">Add</button>
-      </div>
-      <div class="preset-row">
-        <button data-preset="guitar" type="button" class="ghost">Load guitar example</button>
-        <button data-preset="piano" type="button" class="ghost">Load piano example</button>
-        <button data-preset="clear" type="button" class="ghost danger">Clear</button>
-      </div>
-      <ul id="itemList" class="item-list" aria-live="polite"></ul>
-    </section>
-
-    <section class="panel">
-      <h2>Interleaving mode</h2>
-      <div class="mode-grid" role="radiogroup" aria-label="Practice mode">
-        <label class="mode-card"><input type="radio" name="mode" value="serial" checked><span>Serial spots</span><small>Run each hard spot one after another; track successful passes.</small></label>
-        <label class="mode-card"><input type="radio" name="mode" value="interval"><span>Interval cue</span><small>A timer tells you when to perform the chosen spot.</small></label>
-        <label class="mode-card"><input type="radio" name="mode" value="switch"><span>Time-constrained switching</span><small>Switch tasks every 2–5 minutes or your chosen interval.</small></label>
-        <label class="mode-card"><input type="radio" name="mode" value="random"><span>Random sections</span><small>Number sections and practice in a shuffled order.</small></label>
-        <label class="mode-card"><input type="radio" name="mode" value="newmusic"><span>New music revisit</span><small>Return to earlier spots after intervening material.</small></label>
-      </div>
-      <div class="grid three controls">
-        <label>Rounds
-          <input id="rounds" type="number" min="1" max="20" value="3" />
-        </label>
-        <label>Goal ticks per spot
-          <input id="goalTicks" type="number" min="1" max="10" value="5" />
-        </label>
-        <label>Break after each block, seconds
-          <input id="breakSeconds" type="number" min="0" max="600" value="10" />
-        </label>
-      </div>
-      <div class="button-row">
-        <button id="generate" type="button">Generate session</button>
-        <button id="shuffle" type="button" class="ghost">Shuffle current</button>
-        <button id="save" type="button" class="ghost">Save in browser</button>
-      </div>
-    </section>
-
-    <section class="panel timer-panel">
-      <div class="timer-top">
-        <div>
-          <p id="phaseLabel" class="eyebrow">Ready</p>
-          <h2 id="currentTask">Generate a session to begin</h2>
-          <p id="nextTask" class="muted"></p>
-        </div>
-        <div id="timeDisplay" class="time">00:00</div>
-      </div>
-      <progress id="progress" value="0" max="100"></progress>
-      <div class="button-row">
-        <button id="startPause" type="button">Start</button>
-        <button id="next" type="button" class="ghost">Next</button>
-        <button id="reset" type="button" class="ghost">Reset</button>
-        <button id="beepTest" type="button" class="ghost">Test beep</button>
-      </div>
-      <div class="serial-tools">
-        <button id="goodPass" type="button" class="success">Good pass + tick</button>
-        <button id="missPass" type="button" class="danger">Poor pass: clear this spot</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Session plan</h2>
-      <ol id="plan" class="plan"></ol>
-    </section>
-
-    <section class="panel">
-      <h2>Notes / practice journal</h2>
-      <textarea id="notes" rows="7" placeholder="Goal, problem, solution, teacher note, what to test next..."></textarea>
-      <div class="button-row">
-        <button id="exportJson" type="button" class="ghost">Export JSON</button>
-        <label class="file-button">Import JSON<input id="importJson" type="file" accept="application/json" /></label>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>Static, local-first app. No account, server, or tracking. Works from GitHub Pages.</p>
-  </footer>
-
-  <template id="itemTemplate">
-    <li>
-      <span class="drag">☰</span>
-      <input class="item-title" />
-      <input class="item-duration" type="number" min="1" max="30" />
-      <button class="remove ghost danger" type="button">Remove</button>
-    </li>
-  </template>
-
-  <script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A practical interleaved practice timer for musicians and learners."
+    />
+    <title>Interleaved Practice Timer</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/App.jsx"></script>
+  </body>
 </html>
