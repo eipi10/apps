@@ -80,12 +80,15 @@ test("plays an audio cue when a timed block ends", async ({ page }) => {
   await page.getByLabel("Practice items").fill("A\nB");
   await page.getByLabel("Minutes per item").fill("0.02");
   await page.getByRole("button", { name: "Start" }).click();
+  expect(await page.evaluate(() => window.__audioCueEvents.includes("start"))).toBe(
+    false
+  );
 
   await expect(page.getByTestId("current-item")).toHaveText("B");
   await expect
     .poll(async () =>
       page.evaluate(() => window.__audioCueEvents.filter((event) => event === "start").length)
     )
-    .toBeGreaterThanOrEqual(2);
+    .toBeGreaterThanOrEqual(1);
   await expect(page.getByTestId("remaining-time")).toHaveText("0:01");
 });
