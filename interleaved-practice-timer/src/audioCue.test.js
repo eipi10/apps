@@ -34,6 +34,7 @@ function makeWindowWithAudioContext() {
 
 function makeWindowWithAudioElement() {
   const play = vi.fn(() => Promise.resolve());
+  const load = vi.fn();
   const audioInstances = [];
   class FakeAudio {
     constructor(src) {
@@ -41,11 +42,12 @@ function makeWindowWithAudioElement() {
       this.currentTime = 0;
       this.preload = "";
       this.play = play;
+      this.load = load;
       audioInstances.push(this);
     }
   }
 
-  return { Audio: FakeAudio, audioInstances, play };
+  return { Audio: FakeAudio, audioInstances, load, play };
 }
 
 describe("preparePracticeBeep", () => {
@@ -53,24 +55,18 @@ describe("preparePracticeBeep", () => {
     expect(preparePracticeBeep({ current: null }, {})).toBe(false);
   });
 
-  it("creates an audio context and schedules an inaudible unlock tone", () => {
+  it("creates and resumes an audio context without starting a tone", () => {
     const windowLike = makeWindowWithAudioContext();
     const audioContextRef = { current: null };
 
     expect(preparePracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createGain).toHaveBeenCalledTimes(1);
-    expect(windowLike.oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
-      440,
-      10
-    );
-    expect(windowLike.gain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 10);
-    expect(windowLike.oscillator.start).toHaveBeenCalledWith(10);
-    expect(windowLike.oscillator.stop).toHaveBeenCalledWith(10.12);
+    expect(windowLike.context.createOscillator).not.toHaveBeenCalled();
+    expect(windowLike.context.createGain).not.toHaveBeenCalled();
+    expect(windowLike.oscillator.start).not.toHaveBeenCalled();
   });
 
-  it("unlocks an audio element fallback for mobile browsers", () => {
+  it("preloads an audio element fallback without playing it", () => {
     const windowLike = makeWindowWithAudioElement();
     const audioContextRef = { current: null };
 
@@ -78,7 +74,8 @@ describe("preparePracticeBeep", () => {
     expect(windowLike.audioInstances).toHaveLength(1);
     expect(windowLike.audioInstances[0].src).toContain("data:audio/wav;base64,");
     expect(windowLike.audioInstances[0].preload).toBe("auto");
-    expect(windowLike.play).toHaveBeenCalledTimes(1);
+    expect(windowLike.load).toHaveBeenCalledTimes(1);
+    expect(windowLike.play).not.toHaveBeenCalled();
   });
 });
 

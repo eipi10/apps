@@ -82,6 +82,16 @@ function playMediaElement(state, windowLike) {
   }
 }
 
+function prepareMediaElement(state, windowLike) {
+  if (!windowLike.Audio) return false;
+  if (!state.audioElement) {
+    state.audioElement = new windowLike.Audio(makeBeepWavDataUrl());
+    state.audioElement.preload = "auto";
+    if (state.audioElement.load) state.audioElement.load();
+  }
+  return true;
+}
+
 function playWebAudioTone(state, windowLike, { frequency, volume, duration }) {
   try {
     const context = ensureAudioContext(state, windowLike);
@@ -107,12 +117,8 @@ function playWebAudioTone(state, windowLike, { frequency, volume, duration }) {
 
 export function preparePracticeBeep(audioRef, windowLike = window) {
   const state = getAudioState(audioRef);
-  const webAudioReady = playWebAudioTone(state, windowLike, {
-    frequency: 440,
-    volume: 0.04,
-    duration: 0.08
-  });
-  const mediaReady = playMediaElement(state, windowLike);
+  const webAudioReady = Boolean(ensureAudioContext(state, windowLike));
+  const mediaReady = prepareMediaElement(state, windowLike);
   return webAudioReady || mediaReady;
 }
 
