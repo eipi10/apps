@@ -15,6 +15,19 @@ test("configures a fixed ordered interleaved session", async ({ page }) => {
   await expect(page.getByTestId("current-item")).toHaveText("Shift drill");
 });
 
+test("updates the displayed countdown when timer length changes before starting", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("remaining-time")).toHaveText("3:00");
+
+  await page.getByLabel("Minutes per item").fill("5");
+  await expect(page.getByTestId("remaining-time")).toHaveText("5:00");
+
+  await page.getByLabel("Random range").check();
+  await page.getByLabel("Min minutes").fill("1");
+  await page.getByLabel("Max minutes").fill("1");
+  await expect(page.getByTestId("remaining-time")).toHaveText("1:00");
+});
+
 test("supports random ranges and random item selection without staying stuck", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("Practice items").fill("A\nB\nC");
@@ -68,9 +81,11 @@ test("plays an audio cue when a timed block ends", async ({ page }) => {
   await page.getByLabel("Minutes per item").fill("0.02");
   await page.getByRole("button", { name: "Start" }).click();
 
-  await expect.poll(async () => page.evaluate(() => window.__audioCueEvents)).toContain(
-    "start"
-  );
   await expect(page.getByTestId("current-item")).toHaveText("B");
+  await expect
+    .poll(async () =>
+      page.evaluate(() => window.__audioCueEvents.filter((event) => event === "start").length)
+    )
+    .toBeGreaterThanOrEqual(2);
   await expect(page.getByTestId("remaining-time")).toHaveText("0:01");
 });
