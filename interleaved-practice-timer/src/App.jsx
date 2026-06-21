@@ -111,7 +111,7 @@ function App() {
       <section className="timer-panel" aria-labelledby="app-title">
         <div className="timer-copy">
           <p className="eyebrow">Interleaved Practice</p>
-          <h3 id="app-title">Practice what comes next, not what feels easiest.</h3>
+          <h2 id="app-title">Practice what comes next, not what feels easiest.</h2>
           <p>
             Set short blocks, rotate through sections, and let the timer pull you
             into the next rep before your brain settles into autopilot.
