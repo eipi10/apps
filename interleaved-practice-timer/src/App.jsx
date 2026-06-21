@@ -209,6 +209,7 @@ function App() {
                 min="0.1"
                 step="0.1"
                 value={settings.fixedMinutes}
+                onInput={(event) => updateSetting("fixedMinutes", event.target.value)}
                 onChange={(event) => updateSetting("fixedMinutes", event.target.value)}
               />
             </label>
@@ -222,6 +223,7 @@ function App() {
                   min="0.1"
                   step="0.1"
                   value={settings.minMinutes}
+                  onInput={(event) => updateSetting("minMinutes", event.target.value)}
                   onChange={(event) => updateSetting("minMinutes", event.target.value)}
                 />
               </label>
@@ -233,6 +235,7 @@ function App() {
                   min="0.1"
                   step="0.1"
                   value={settings.maxMinutes}
+                  onInput={(event) => updateSetting("maxMinutes", event.target.value)}
                   onChange={(event) => updateSetting("maxMinutes", event.target.value)}
                 />
               </label>

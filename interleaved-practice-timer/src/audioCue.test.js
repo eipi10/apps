@@ -32,6 +32,22 @@ function makeWindowWithAudioContext() {
   };
 }
 
+function makeWindowWithAudioElement() {
+  const play = vi.fn(() => Promise.resolve());
+  const audioInstances = [];
+  class FakeAudio {
+    constructor(src) {
+      this.src = src;
+      this.currentTime = 0;
+      this.preload = "";
+      this.play = play;
+      audioInstances.push(this);
+    }
+  }
+
+  return { Audio: FakeAudio, audioInstances, play };
+}
+
 describe("preparePracticeBeep", () => {
   it("returns false when Web Audio is unavailable", () => {
     expect(preparePracticeBeep({ current: null }, {})).toBe(false);
@@ -51,7 +67,18 @@ describe("preparePracticeBeep", () => {
     );
     expect(windowLike.gain.gain.setValueAtTime).toHaveBeenCalledWith(0.0001, 10);
     expect(windowLike.oscillator.start).toHaveBeenCalledWith(10);
-    expect(windowLike.oscillator.stop).toHaveBeenCalledWith(10.04);
+    expect(windowLike.oscillator.stop).toHaveBeenCalledWith(10.12);
+  });
+
+  it("unlocks an audio element fallback for mobile browsers", () => {
+    const windowLike = makeWindowWithAudioElement();
+    const audioContextRef = { current: null };
+
+    expect(preparePracticeBeep(audioContextRef, windowLike)).toBe(true);
+    expect(windowLike.audioInstances).toHaveLength(1);
+    expect(windowLike.audioInstances[0].src).toContain("data:audio/wav;base64,");
+    expect(windowLike.audioInstances[0].preload).toBe("auto");
+    expect(windowLike.play).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -66,8 +93,8 @@ describe("playPracticeBeep", () => {
 
     expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).toHaveBeenCalledTimes(1);
-    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(2);
-    expect(windowLike.context.createGain).toHaveBeenCalledTimes(2);
+    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
+    expect(windowLike.context.createGain).toHaveBeenCalledTimes(1);
     expect(windowLike.oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
       880,
       10
@@ -82,10 +109,22 @@ describe("playPracticeBeep", () => {
 
   it("reuses an existing audio context", () => {
     const windowLike = makeWindowWithAudioContext();
-    const audioContextRef = { current: windowLike.context };
+    const audioContextRef = {
+      current: { audioContext: windowLike.context, audioElement: null }
+    };
 
     expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
     expect(windowLike.AudioContext).not.toHaveBeenCalled();
-    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(2);
+    expect(windowLike.context.createOscillator).toHaveBeenCalledTimes(1);
+  });
+
+  it("reuses the audio element fallback", () => {
+    const windowLike = makeWindowWithAudioElement();
+    const audioContextRef = { current: null };
+
+    expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
+    expect(playPracticeBeep(audioContextRef, windowLike)).toBe(true);
+    expect(windowLike.audioInstances).toHaveLength(1);
+    expect(windowLike.play).toHaveBeenCalledTimes(2);
   });
 });
