@@ -74,6 +74,21 @@ test("plays an audio cue when a timed block ends", async ({ page }) => {
       }
     }
     window.AudioContext = FakeAudioContext;
+    window.Audio = class FakeAudio {
+      constructor() {
+        this.currentTime = 0;
+        this.preload = "";
+      }
+
+      load() {
+        window.__audioCueEvents.push("load");
+      }
+
+      play() {
+        window.__audioCueEvents.push("play");
+        return Promise.resolve();
+      }
+    };
   });
 
   await page.goto("/");
@@ -87,7 +102,7 @@ test("plays an audio cue when a timed block ends", async ({ page }) => {
   await expect(page.getByTestId("current-item")).toHaveText("B");
   await expect
     .poll(async () =>
-      page.evaluate(() => window.__audioCueEvents.filter((event) => event === "start").length)
+      page.evaluate(() => window.__audioCueEvents.filter((event) => event === "play").length)
     )
     .toBeGreaterThanOrEqual(1);
   await expect(page.getByTestId("remaining-time")).toHaveText("0:01");
