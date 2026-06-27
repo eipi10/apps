@@ -1,6 +1,6 @@
 # Interleaved Practice Timer
 
-A browser app for setting up short, repeated practice blocks inspired by interleaved practice routines for musicians and other learners.
+A browser app for setting up short, repeated practice blocks inspired by interleaved practice routines for musicians and other learners as described in the book *Learn Faster, Perform Better*, by Molly Gebrian.
 
 ## Features
 
