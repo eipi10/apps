@@ -5,6 +5,7 @@ import {
   formatDuration,
   getIntervalSeconds,
   getNextItemIndex,
+  makeRandomItemOrder,
   makeSessionSummary,
   parsePracticeItems
 } from "./practiceEngine.js";
@@ -28,6 +29,7 @@ function App() {
   const [running, setRunning] = useState(false);
   const intervalRef = useRef(null);
   const audioContextRef = useRef(null);
+  const randomOrderRef = useRef({ order: [], position: 0 });
 
   const items = useMemo(() => parsePracticeItems(itemText), [itemText]);
   const currentItem = items[currentIndex] ?? "Add a practice item";
@@ -39,6 +41,36 @@ function App() {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+  }
+
+  function setRandomOrder(itemCount, previousLastIndex = -1) {
+    const order = makeRandomItemOrder(itemCount, { previousLastIndex });
+    randomOrderRef.current = { order, position: 0 };
+    return order;
+  }
+
+  function getNextRandomIndex(currentItemIndex, itemCount) {
+    if (itemCount <= 0) return -1;
+    if (itemCount === 1) return 0;
+
+    let { order } = randomOrderRef.current;
+    let currentPosition = order.indexOf(currentItemIndex);
+
+    if (order.length !== itemCount || currentPosition === -1) {
+      order = setRandomOrder(itemCount);
+      currentPosition = Math.max(order.indexOf(currentItemIndex), 0);
+      randomOrderRef.current.position = currentPosition;
+    }
+
+    if (currentPosition < order.length - 1) {
+      const position = currentPosition + 1;
+      randomOrderRef.current = { order, position };
+      return order[position];
+    }
+
+    const previousLastIndex = order[order.length - 1];
+    const nextOrder = setRandomOrder(itemCount, previousLastIndex);
+    return nextOrder[0];
   }
 
   function scheduleNextTick() {
@@ -55,7 +87,14 @@ function App() {
     if (!canStart) return;
     preparePracticeBeep(audioContextRef);
     const nextDuration = getIntervalSeconds(settings);
-    const safeIndex = Math.min(currentIndex, Math.max(items.length - 1, 0));
+    let safeIndex = Math.min(currentIndex, Math.max(items.length - 1, 0));
+    if (settings.orderMode === "random") {
+      const { order } = randomOrderRef.current;
+      if (order.length !== items.length || !order.includes(safeIndex)) {
+        const nextOrder = setRandomOrder(items.length);
+        safeIndex = nextOrder[0] ?? 0;
+      }
+    }
     setCurrentIndex(safeIndex);
     setDuration(nextDuration);
     setRemaining(nextDuration);
@@ -71,7 +110,13 @@ function App() {
   function resetSession() {
     clearTimer();
     const nextDuration = getIntervalSeconds(settings);
-    setCurrentIndex(0);
+    if (settings.orderMode === "random") {
+      const nextOrder = setRandomOrder(items.length);
+      setCurrentIndex(nextOrder[0] ?? 0);
+    } else {
+      randomOrderRef.current = { order: [], position: 0 };
+      setCurrentIndex(0);
+    }
     setDuration(nextDuration);
     setRemaining(nextDuration);
     setRunning(false);
@@ -79,13 +124,18 @@ function App() {
 
   function advanceItem({ resetRemaining = true } = {}) {
     const nextDuration = getIntervalSeconds(settings);
-    setCurrentIndex((index) =>
-      getNextItemIndex({
-        currentIndex: Math.min(index, items.length - 1),
+    setCurrentIndex((index) => {
+      const safeIndex = Math.min(index, items.length - 1);
+      if (settings.orderMode === "random") {
+        return getNextRandomIndex(safeIndex, items.length);
+      }
+
+      return getNextItemIndex({
+        currentIndex: safeIndex,
         itemCount: items.length,
         orderMode: settings.orderMode
-      })
-    );
+      });
+    });
     setDuration(nextDuration);
     if (resetRemaining) setRemaining(nextDuration);
     return nextDuration;
@@ -99,6 +149,15 @@ function App() {
   function updateSetting(key, value) {
     const nextSettings = { ...settings, [key]: value };
     setSettings(nextSettings);
+    if (key === "orderMode") {
+      if (value === "random") {
+        const nextOrder = setRandomOrder(items.length);
+        setCurrentIndex(nextOrder[0] ?? 0);
+      } else {
+        randomOrderRef.current = { order: [], position: 0 };
+        setCurrentIndex(0);
+      }
+    }
     if (!running && key !== "orderMode") {
       const nextDuration = getIntervalSeconds(nextSettings);
       setDuration(nextDuration);
@@ -157,24 +216,31 @@ function App() {
             </button>
           </div>
         </div>
-      </section>
 
-      <section className="controls-grid" aria-label="Timer settings">
-        <div className="control-block">
+        <div className="control-block practice-items-card">
           <label htmlFor="items">Practice items</label>
           <textarea
             id="items"
             value={itemText}
             onChange={(event) => {
-              setItemText(event.target.value);
-              setCurrentIndex(0);
+              const nextText = event.target.value;
+              const nextItems = parsePracticeItems(nextText);
+              setItemText(nextText);
+              if (settings.orderMode === "random") {
+                const nextOrder = setRandomOrder(nextItems.length);
+                setCurrentIndex(nextOrder[0] ?? 0);
+              } else {
+                setCurrentIndex(0);
+              }
             }}
             rows={8}
             placeholder="Bach m. 17-24&#10;Shift exercise&#10;Run-through ending"
           />
           <span className="hint">One per line, or separate short names with commas.</span>
         </div>
+      </section>
 
+      <section className="controls-grid" aria-label="Timer settings">
         <div className="control-block">
           <fieldset>
             <legend>Timer length</legend>

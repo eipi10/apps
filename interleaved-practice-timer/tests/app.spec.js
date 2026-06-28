@@ -29,6 +29,10 @@ test("updates the displayed countdown when timer length changes before starting"
 });
 
 test("supports random ranges and random item selection without staying stuck", async ({ page }) => {
+  await page.addInitScript(() => {
+    Math.random = () => 0;
+  });
+
   await page.goto("/");
   await page.getByLabel("Practice items").fill("A\nB\nC");
   await page.getByLabel("Random range").check();
@@ -36,10 +40,14 @@ test("supports random ranges and random item selection without staying stuck", a
   await page.getByLabel("Max minutes").fill("0.2");
   await page.getByLabel("Random", { exact: true }).check();
 
-  const first = await page.getByTestId("current-item").textContent();
+  await expect(page.getByTestId("current-item")).toHaveText("B");
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByTestId("session-summary")).toContainText("0.1-0.2 min");
-  await expect(page.getByTestId("current-item")).not.toHaveText(first ?? "");
+  await expect(page.getByTestId("current-item")).toHaveText("C");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByTestId("current-item")).toHaveText("A");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByTestId("current-item")).toHaveText("B");
 });
 
 test("plays an audio cue when a timed block ends", async ({ page }) => {

@@ -28,8 +28,8 @@ textarea {
 
 .timer-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 32px;
+  grid-template-columns: minmax(220px, 0.65fr) minmax(300px, 1fr) minmax(300px, 0.95fr);
+  gap: 18px;
   align-items: stretch;
   max-width: 1160px;
   margin: 0 auto 28px;
@@ -45,7 +45,7 @@ textarea {
 }
 
 .timer-copy {
-  padding: clamp(28px, 5vw, 54px);
+  padding: 22px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -62,17 +62,15 @@ textarea {
 
 h1 {
   margin: 0;
-  max-width: 780px;
-  font-size: clamp(2.4rem, 6vw, 5.7rem);
-  line-height: 0.95;
+  font-size: clamp(1.65rem, 2.6vw, 2.55rem);
+  line-height: 1.06;
   letter-spacing: 0;
 }
 
 .timer-copy p:last-child {
-  max-width: 660px;
   color: #5c5143;
-  font-size: 1.08rem;
-  line-height: 1.6;
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
 
 .timer-face {
@@ -82,7 +80,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  min-height: 520px;
+  min-height: 460px;
   text-align: center;
 }
 
@@ -90,7 +88,7 @@ h1 {
   --progress: 0%;
   display: grid;
   place-items: center;
-  width: min(66vw, 280px);
+  width: min(54vw, 260px);
   aspect-ratio: 1;
   border-radius: 50%;
   background:
@@ -167,7 +165,7 @@ button:disabled {
 
 .controls-grid {
   display: grid;
-  grid-template-columns: minmax(300px, 1.2fr) repeat(2, minmax(260px, 0.9fr));
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 18px;
   max-width: 1160px;
   margin: 0 auto;
@@ -201,10 +199,20 @@ input[type="number"] {
 }
 
 textarea {
-  min-height: 190px;
+  min-height: 180px;
   padding: 12px;
   resize: vertical;
   line-height: 1.5;
+}
+
+.practice-items-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.practice-items-card textarea {
+  flex: 1;
+  min-height: 260px;
 }
 
 input[type="number"] {

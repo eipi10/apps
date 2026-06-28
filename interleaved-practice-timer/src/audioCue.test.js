@@ -104,11 +104,11 @@ describe("playPracticeBeep", () => {
       10
     );
     expect(windowLike.gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-      0.22,
+      0.75,
       10.02
     );
     expect(windowLike.oscillator.start).toHaveBeenCalledWith(10);
-    expect(windowLike.oscillator.stop).toHaveBeenCalledWith(10.42);
+    expect(windowLike.oscillator.stop.mock.calls[0][0]).toBeCloseTo(10.49);
   });
 
   it("reuses an existing audio context", () => {

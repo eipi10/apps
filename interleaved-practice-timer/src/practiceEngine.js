@@ -51,6 +51,26 @@ export function getNextItemIndex({
   return (currentIndex + 1) % itemCount;
 }
 
+export function makeRandomItemOrder(
+  itemCount,
+  { previousLastIndex = -1, random = Math.random } = {}
+) {
+  if (itemCount <= 0) return [];
+
+  const order = Array.from({ length: itemCount }, (_, index) => index);
+  for (let index = order.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [order[index], order[swapIndex]] = [order[swapIndex], order[index]];
+  }
+
+  if (itemCount > 1 && order[0] === previousLastIndex) {
+    const swapIndex = order.findIndex((index) => index !== previousLastIndex);
+    [order[0], order[swapIndex]] = [order[swapIndex], order[0]];
+  }
+
+  return order;
+}
+
 export function formatDuration(totalSeconds) {
   const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
   const minutes = Math.floor(safeSeconds / 60);

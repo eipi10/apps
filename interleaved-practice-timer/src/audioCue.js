@@ -11,7 +11,7 @@ function makeBeepWavDataUrl() {
   if (beepWavDataUrl) return beepWavDataUrl;
 
   const sampleRate = 8000;
-  const duration = 0.18;
+  const duration = 0.26;
   const samples = Math.floor(sampleRate * duration);
   const bytes = new Uint8Array(44 + samples * 2);
   const view = new DataView(bytes.buffer);
@@ -39,7 +39,7 @@ function makeBeepWavDataUrl() {
   for (let index = 0; index < samples; index += 1) {
     const envelope = Math.sin((Math.PI * index) / samples);
     const value =
-      Math.sin((2 * Math.PI * 880 * index) / sampleRate) * envelope * 0.45;
+      Math.sin((2 * Math.PI * 880 * index) / sampleRate) * envelope * 0.92;
     view.setInt16(44 + index * 2, Math.round(value * 32767), true);
   }
 
@@ -128,7 +128,7 @@ export function playPracticeBeep(audioRef, windowLike = window) {
 
   return playWebAudioTone(state, windowLike, {
     frequency: 880,
-    volume: 0.22,
-    duration: 0.38
+    volume: 0.75,
+    duration: 0.45
   });
 }

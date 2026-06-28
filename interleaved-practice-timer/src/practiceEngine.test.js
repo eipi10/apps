@@ -3,6 +3,7 @@ import {
   formatDuration,
   getIntervalSeconds,
   getNextItemIndex,
+  makeRandomItemOrder,
   parsePracticeItems,
   secondsFromMinutes
 } from "./practiceEngine.js";
@@ -46,6 +47,21 @@ describe("practiceEngine", () => {
       random: () => randomValues.shift()
     });
     expect(next).toBe(2);
+  });
+
+  it("makes a random permutation of item indexes", () => {
+    const randomValues = [0, 0];
+    expect(
+      makeRandomItemOrder(3, { random: () => randomValues.shift() ?? 0 })
+    ).toEqual([1, 2, 0]);
+  });
+
+  it("does not put the previous cycle's last item first", () => {
+    expect(makeRandomItemOrder(3, { previousLastIndex: 1, random: () => 0 })).toEqual([
+      2,
+      1,
+      0
+    ]);
   });
 
   it("formats durations for the timer face", () => {
